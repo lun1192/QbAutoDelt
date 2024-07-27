@@ -124,14 +124,15 @@ def torrent_Check(torrentsInfo):
     torrentData = dict()
 
     for torrent in torrentsInfo:
-        if not torrent.state == "downloading":
+        if torrent.state == "uploading":
             if list_Contains(convert_To_List(torrent.tags), tagsPriority):
                 if seed_Time_Torrent(torrent) > minSeedTime:
                     torrentInfo = (torrent.name, torrent.size)
                     torrentData[torrent.hash] = torrentInfo
         else:
             if list_Contains(convert_To_List(torrent.tags), tagsPriority):
-                 if torrent.upspeed < minSeedUpspeed:
+                torrentProperties = qbt.torrents_properties(torrent.hash)
+                 if torrentProperties.up_speed_avg < minSeedUpspeed:
                     torrentInfo = (torrent.name, torrent.size)
                     torrentData[torrent.hash] = torrentInfo     
     return torrentData
