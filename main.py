@@ -118,39 +118,22 @@ def seed_Time_Torrent(torrent):
 def torrent_Check(torrentsInfo):
     
     minSeedTime = int(cfgGen["autoSupp"]["minSeedTime"]) * 60 * 60
-    minSeedUpspeed = int(cfgGen["autoSupp"]["minSeedTime"]) * 60 * 60
+    minSeedUpspeed = int(cfgGen["autoSupp"]["minSeedUpspeed "]) * 1024
     excludTorrentStatesToExclud = cfgGen["Torrent_States"]["TorrentStatesToExclud"]
-    tagsPriority = cfgSel["Torrents_Tags"]["priority"]
-    categoryPriority = cfgSel["Torrents_Category"]["priority"]
-    excludTags = cfgSel["Torrents_Tags"]["exclud"]
-    excludCats = cfgSel["Torrents_Category"]["exclud"]
-
+    tagsPriority = cfgGen["Torrents_Tags"]["priority"]
     torrentData = dict()
 
     for torrent in torrentsInfo:
         if not torrent.state == "downloading":
             if list_Contains(convert_To_List(torrent.tags), tagsPriority):
-                if cfgGen["autoSupp"]["priority"]:
-                    if seed_Time_Torrent(torrent) > minSeedTime:
-                        torrentInfo = (torrent.name, torrent.size)
-                        torrentData[torrent.hash] = torrentInfo
-            elif list_Contains(convert_To_List(torrent.category), categoryPriority):
-                if cfgGen["autoSupp"]["priority"]:
-                    if seed_Time_Torrent(torrent) > minSeedTime:
-                        torrentInfo = (torrent.name, torrent.size)
-                        torrentData[torrent.hash] = torrentInfo
+                if seed_Time_Torrent(torrent) > minSeedTime:
+                    torrentInfo = (torrent.name, torrent.size)
+                    torrentData[torrent.hash] = torrentInfo
         else:
             if list_Contains(convert_To_List(torrent.tags), tagsPriority):
-                if cfgGen["autoSupp"]["priority"]:
-                    if torrent.upspeed < minSeedUpspeed:
-                        torrentInfo = (torrent.name, torrent.size)
-                        torrentData[torrent.hash] = torrentInfo
-            elif list_Contains(convert_To_List(torrent.category), categoryPriority):
-                if cfgGen["autoSupp"]["priority"]:
-                    if torrent.upspeed < minSeedUpspeed:
-                        torrentInfo = (torrent.name, torrent.size)
-                        torrentData[torrent.hash] = torrentInfo
-                        
+                 if torrent.upspeed < minSeedUpspeed:
+                    torrentInfo = (torrent.name, torrent.size)
+                    torrentData[torrent.hash] = torrentInfo     
     return torrentData
 
 
@@ -186,11 +169,6 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
-        
-        # Torrent Selection Config :
-        with open('config/TorrentsSelectionSetting.yml') as ymlfile:
-            cfgSel = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
         qbt = qBit_Connection(logger, cfgGen)
         torrentsInfo = qbt.torrents_info()
         torrentCheck = torrent_Check(torrentsInfo)
